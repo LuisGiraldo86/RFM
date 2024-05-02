@@ -58,6 +58,6 @@ def load_dataset(path_to_data:str)->pd.DataFrame:
     
     for file in files_list:
         df_temp = pd.read_csv(os.path.join(path_to_data, file))
-        df = pd.concat([df, df_temp], axis=1)
+        df = pd.concat([df, df_temp], axis=0)
 
     return df
