@@ -4,6 +4,19 @@ from datetime import datetime
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
+class Identity(BaseEstimator, TransformerMixin):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_feature_names_out(self)->None:
+        pass
+
+    def fit(self, X:pd.DataFrame, y=None):
+        return self
+    
+    def transform(self, X:pd.DataFrame, y=None)->pd.DataFrame:
+        return X
 
 class Recency(TransformerMixin, BaseEstimator):
 
@@ -15,17 +28,19 @@ class Recency(TransformerMixin, BaseEstimator):
         pass
 
     def fit(self, X:pd.DataFrame, y=None):
-        pass
+        return self
 
     def transform(self, X:pd.DataFrame, y=None)->pd.DataFrame:
 
         X_copy = X.copy()
-        col = X_copy.columns[0]
+        col = X_copy.columns
 
         date_to_compare = self.date_to_compare
 
-        X_copy[col] = pd.to_datetime(X_copy[col])
+        X_copy[col[1]] = pd.to_datetime(X_copy[col[1]])
 
-        X_copy['recency'] = (date_to_compare-X_copy[col]).days
+        X_copy['recency'] = date_to_compare - X_copy[col[1]]
 
-        return X_copy['recency']
+        X_copy['recency'] = X_copy['recency'].apply(lambda x: x.days)
+
+        return X_copy[['recency']]
