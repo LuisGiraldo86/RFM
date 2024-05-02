@@ -9,6 +9,22 @@ import pandas as pd
 
 def fetch_web_data(http_address:str, path_folder:str)->None:
 
+    """
+    Function to fetch sales data from a web repository.
+
+    Parameters
+    ----------
+    http_address: str
+        link pointing to the .tgz file with the sales data
+
+    path_folder: str
+        path to the folder where the data will be stored.
+
+    Return
+    ------
+    None
+    """
+
     if not os.path.isdir(path_folder):
         os.makedirs(path_folder)
     
@@ -21,6 +37,19 @@ def fetch_web_data(http_address:str, path_folder:str)->None:
     pass
 
 def load_dataset(path_to_data:str)->pd.DataFrame:
+
+    """
+    Function to load the data into a pandas dataframe.
+
+    Parameter
+    ---------
+    path_to_data: str
+        path to the folder where the .csv files are stored
+
+    Return
+    ------
+    pandas.DataFrame
+    """
 
     files_list = [file for file in os.listdir(path_to_data) if file.split('.')[-1]=='csv']
 
