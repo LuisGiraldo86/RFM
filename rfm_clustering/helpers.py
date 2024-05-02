@@ -2,8 +2,8 @@
 Module to store auxilary functions
 """
 import os
-import urllib.request
-import zipfile
+from urllib.request import urlretrieve
+import tarfile
 
 import pandas as pd
 
@@ -13,9 +13,9 @@ def fetch_web_data(http_address:str, path_folder:str)->None:
         os.makedirs(path_folder)
     
     zip_path = os.path.join(path_folder, 'sales.zip')
-    urllib.request.urlretrieve(http_address, zip_path)
+    urlretrieve(http_address, zip_path)
 
-    with zipfile.ZipFile(zip_path, 'r') as file:
+    with tarfile.open(zip_path) as file:
         file.extractall(path_folder)
     
     pass
@@ -27,7 +27,7 @@ def load_dataset(path_to_data:str)->pd.DataFrame:
     df = pd.DataFrame()
     
     for file in files_list:
-        df_temp = pd.read_csv(file)
+        df_temp = pd.read_csv(os.path.join(path_to_data, file))
         df = pd.concat([df, df_temp], axis=1)
 
     return df
