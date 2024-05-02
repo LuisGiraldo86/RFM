@@ -1,6 +1,7 @@
 """
 Module to store auxilary functions
 """
+
 import os
 from urllib.request import urlretrieve
 import tarfile
