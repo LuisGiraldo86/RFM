@@ -60,4 +60,4 @@ def load_dataset(path_to_data:str)->pd.DataFrame:
         df_temp = pd.read_csv(os.path.join(path_to_data, file))
         df = pd.concat([df, df_temp], axis=0)
 
-    return df
+    return df[df['Country']=='United Kingdom'].reset_index(drop=True)
