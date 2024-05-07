@@ -1,6 +1,6 @@
 
 from rfm_clustering.helpers import fetch_web_data, load_dataset
-from rfm_clustering.rfm_sklearn import Recency
+from rfm_clustering.rfm_sklearn import Recency, Spending, Identity
 
 import pandas as pd
 
