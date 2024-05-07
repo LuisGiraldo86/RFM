@@ -44,3 +44,23 @@ class Recency(TransformerMixin, BaseEstimator):
         X_copy['recency'] = X_copy['recency'].apply(lambda x: x.days)
 
         return X_copy[['recency']]
+    
+class Spending(TransformerMixin, BaseEstimator):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_feature_names_out()->None:
+        pass
+
+    def fit(self, X:pd.DataFrame, y=None):
+        return self
+    
+    def transform(self, X:pd.DataFrame, y=None)->pd.DataFrame:
+
+        X_copy = X.copy()
+        col = X_copy.columns
+
+        X_copy['spending'] = X_copy[col[0]]*X_copy[col[1]]
+
+        return X_copy['spending']
