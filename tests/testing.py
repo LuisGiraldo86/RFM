@@ -1,6 +1,6 @@
 
 from rfm_clustering.helpers import fetch_web_data, load_dataset
-from rfm_clustering.rfm_sklearn import Recency, Spending, Identity
+from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, raw_rfm, QuartileEncoder
 
 import pandas as pd
 
@@ -35,14 +35,20 @@ df_1 = rfm_trans.fit_transform(df)
 
 del df
 
-df_2 = df_1.groupby(by=['identity__Customer ID', 'identity__Invoice'], as_index=False).agg({
-    'recency__recency'  : 'min',
-    'spending__spending': 'sum',
-})
-df_3 = df_2.groupby(by='identity__Customer ID', as_index=False).agg({
-    'identity__Invoice': 'count',
-    'recency__recency': 'min',
-    'spending__spending': 'sum'
-})
-df_3.columns = ['customerID', 'frequency', 'recency', 'money']
-df_3
+df_2 = raw_rfm(df_1)
+
+del df_1
+
+encoder = Pipeline([
+    ('encoder', QuartileEncoder().set_output(transform='pandas'))
+])
+
+encoder_trans = ColumnTransformer([
+    ('quantiles', encoder, ['frequency', 'recency', 'monetary']),
+    ('identity1', identity, ['Customer ID'])
+],
+remainder='passthrough').set_output(transform='pandas')
+
+df_3 = encoder_trans.fit_transform(df_2)
+
+del df_2
