@@ -1,6 +1,6 @@
 
 from rfm_clustering.helpers import fetch_web_data, load_dataset
-from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, raw_rfm, QuartileEncoder
+from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, raw_rfm, QuartileEncoder, RFMcalculator
 
 import pandas as pd
 
@@ -52,3 +52,18 @@ remainder='passthrough').set_output(transform='pandas')
 df_3 = encoder_trans.fit_transform(df_2)
 
 del df_2
+
+rfm_pipe = Pipeline([
+    ('rfm_pipe', RFMcalculator().set_output(transform='pandas'))
+])
+rfm_value = ColumnTransformer([
+    ('rfm_calc', rfm_pipe, ['quantiles__frequency_enc', 'quantiles__recency_enc', 'quantiles__monetary_enc']),
+    ('identity1', identity, ['identity1__Customer ID'])
+],
+remainder='drop').set_output(transform='pandas')
+
+df_4 = rfm_value.fit_transform(df_3)
+
+del df_3
+
+df_4.columns = [col.split('__')[-1] for col in df_4.columns]
