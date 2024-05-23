@@ -115,3 +115,26 @@ class QuartileEncoder(TransformerMixin, BaseEstimator):
             new_cols.append(f"{col}_enc")
 
         return X_copy[new_cols]
+
+class RFMcalculator(TransformerMixin, BaseEstimator):
+
+    def __init__(self) -> None:
+        super().__init__()
+
+    def get_feature_names_out(self)->None:
+        pass
+
+    def fit(self, X:pd.DataFrame, y=None):
+        return self
+        
+    def transform(self, X:pd.DataFrame, y=None)->pd.DataFrame:
+
+        X_copy = X.copy()
+        cols = X_copy.columns
+
+        X_res = pd.DataFrame(np.zeros(X_copy.shape[0]), columns=["RFM"])
+
+        for col in cols:
+            X_res["RFM"] += X_copy[col]
+
+        return X_res
