@@ -110,7 +110,7 @@ class QuartileEncoder(TransformerMixin, BaseEstimator):
             df['first']= (X_copy[col]>fst_quart).astype('int')
             df['zero'] = (X_copy[col]>=minimum).astype('int')
 
-            X_copy[f"{col}_enc"] = df['third'] + df['scnd'] + df['first'] + df['zero']
+            X_copy[f"{col}_enc"] = (df['third'] + df['scnd'] + df['first'] + df['zero'])-1
 
             new_cols.append(f"{col}_enc")
 
@@ -137,4 +137,16 @@ class RFMcalculator(TransformerMixin, BaseEstimator):
         for col in cols:
             X_res["RFM"] += X_copy[col]
 
+        X_res['scale'] = X_res['RFM'].apply(lambda x: self.scale_encoder(x))
+
         return X_res
+    
+    @staticmethod
+    def scale_encoder(rfm_val:int)->str:
+
+        if rfm_val >6:
+            return "Gold"
+        elif rfm_val>2:
+            return "Silver"
+        else:
+            return "Bronze"
