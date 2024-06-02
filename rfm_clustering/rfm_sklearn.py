@@ -137,16 +137,18 @@ class RFMcalculator(TransformerMixin, BaseEstimator):
         for col in cols:
             X_res["RFM"] += X_copy[col]
 
-        X_res['scale'] = X_res['RFM'].apply(lambda x: self.scale_encoder(x))
+        mask_gold = (X_res['RFM']>6)
+        mask_bronze = (X_res['RFM']<3)
+
+        X_res["scale"]= None
+        X_res['subscale']=None
+
+        X_res.loc[mask_gold, 'scale'] = "Gold"
+        X_res.loc[mask_bronze, 'scale'] = "Bronze"
+        X_res.loc[~mask_gold & ~mask_bronze, 'scale'] = "Silver"
+
+        X_res.loc[mask_gold, 'subscale'] = X_res.loc[mask_gold, 'RFM']-7
+        X_res.loc[mask_bronze, 'subscale'] = X_res.loc[mask_bronze, 'RFM']
+        X_res.loc[~mask_gold & ~mask_bronze, 'subscale'] = X_res.loc[~mask_gold & ~mask_bronze, 'RFM']-3
 
         return X_res
-    
-    @staticmethod
-    def scale_encoder(rfm_val:int)->str:
-
-        if rfm_val >6:
-            return "Gold"
-        elif rfm_val>2:
-            return "Silver"
-        else:
-            return "Bronze"
