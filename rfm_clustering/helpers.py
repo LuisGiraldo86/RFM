@@ -61,3 +61,15 @@ def load_dataset(path_to_data:str)->pd.DataFrame:
         df = pd.concat([df, df_temp], axis=0)
 
     return df[df['Country']=='United Kingdom'].reset_index(drop=True)
+
+def raw_rfm(data:pd.DataFrame)->pd.DataFrame:
+
+    df = data.groupby(by='identity__Customer ID', as_index=False).agg(
+        frequency= pd.NamedAgg(column='identity__Invoice', aggfunc='nunique'),
+        recency  = pd.NamedAgg(column='recency__recency', aggfunc='min'),
+        monetary = pd.NamedAgg(column='spending__spending', aggfunc='sum')
+    )
+
+    df.columns = [col.split('__')[-1] if '__' in col else col for col in df.columns]
+
+    return df
