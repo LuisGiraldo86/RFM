@@ -5,18 +5,6 @@ from datetime import datetime
 
 from sklearn.base import BaseEstimator, TransformerMixin
 
-def raw_rfm(data:pd.DataFrame)->pd.DataFrame:
-
-    df = data.groupby(by='identity__Customer ID', as_index=False).agg(
-        frequency= pd.NamedAgg(column='identity__Invoice', aggfunc='nunique'),
-        recency  = pd.NamedAgg(column='recency__recency', aggfunc='min'),
-        monetary = pd.NamedAgg(column='spending__spending', aggfunc='sum')
-    )
-
-    df.columns = [col.split('__')[-1] if '__' in col else col for col in df.columns]
-
-    return df
-
 class Identity(BaseEstimator, TransformerMixin):
 
     def __init__(self) -> None:
