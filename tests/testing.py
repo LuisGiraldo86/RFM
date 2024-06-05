@@ -1,6 +1,7 @@
 
 from rfm_clustering.helpers import fetch_web_data, load_dataset
-from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, raw_rfm, QuartileEncoder, RFMcalculator
+from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, QuartileEncoder, RFMcalculator
+from rfm_clustering.rfm_steps import raw_rfm
 
 import pandas as pd
 
@@ -51,7 +52,7 @@ remainder='passthrough').set_output(transform='pandas')
 
 df_3 = encoder_trans.fit_transform(df_2)
 
-del df_2
+df_2
 
 rfm_pipe = Pipeline([
     ('rfm_pipe', RFMcalculator().set_output(transform='pandas'))
@@ -64,6 +65,18 @@ remainder='drop').set_output(transform='pandas')
 
 df_4 = rfm_value.fit_transform(df_3)
 
-del df_3
-
 df_4.columns = [col.split('__')[-1] for col in df_4.columns]
+
+df_5 = df_4.groupby(by=['scale', 'subscale'], as_index=False)['Customer ID'].count()
+
+import plotly.express as px
+
+fig1 = px.sunburst(df_5, path=['scale', 'subscale'], values='Customer ID', color='scale')
+fig1.show()
+
+fig2 = px.treemap(df_5, path=['scale', 'subscale'], values='Customer ID')
+fig2.update_layout(margin = dict(t=50, l=25, r=25, b=25))
+fig2.show()
+
+fig3 = px.scatter_3d(df_2.merge(df_4, on='Customer ID'), x='frequency', y='recency', z='monetary', color='scale')
+fig3.show()
