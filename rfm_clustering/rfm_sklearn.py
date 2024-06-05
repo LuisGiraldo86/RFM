@@ -128,6 +128,8 @@ class RFMcalculator(TransformerMixin, BaseEstimator):
         mask_gold = (X_res['RFM']>6)
         mask_bronze = (X_res['RFM']<3)
 
+        X_res['RFM'] = X_res['RFM'].astype(int)
+
         X_res["scale"]= None
         X_res['subscale']=None
 
@@ -138,5 +140,7 @@ class RFMcalculator(TransformerMixin, BaseEstimator):
         X_res.loc[mask_gold, 'subscale'] = X_res.loc[mask_gold, 'RFM']-7
         X_res.loc[mask_bronze, 'subscale'] = X_res.loc[mask_bronze, 'RFM']
         X_res.loc[~mask_gold & ~mask_bronze, 'subscale'] = X_res.loc[~mask_gold & ~mask_bronze, 'RFM']-3
+
+        X_res['subscale'] = X_res['subscale'].apply(lambda x: f"Level {x}")
 
         return X_res
