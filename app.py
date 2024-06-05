@@ -11,10 +11,9 @@ import plotly.graph_objects as go
 
 from plotly.colors import n_colors
 
-
-
 from rfm_clustering.helpers import fetch_web_data, load_dataset
-from rfm_clustering.rfm_sklearn import Recency, Spending, Identity, raw_rfm, QuartileEncoder, RFMcalculator
+from rfm_clustering.rfm_steps import rfm_by_operation, raw_rfm, encoder_by_quartiles, category_encoder
+
 
 # get current working directory
 path_to_wd = os.getcwd()
@@ -24,29 +23,17 @@ sys.path.append(
     os.path.join(path_to_wd, 'rfm_clustering')
 )
 
-def compute_rfm(df:pd.DataFrame)->pd.DataFrame:
+def axes_style3d(bgcolor = "rgb(204, 204, 204)",
+                 gridcolor="rgb(150, 150, 150)", 
+                 zeroline=False): 
+    return dict(showbackground =True,
+                backgroundcolor=bgcolor,
+                gridcolor=gridcolor,
+                zeroline=False)
 
-    from sklearn.pipeline import Pipeline
-    from sklearn.compose import ColumnTransformer
+def compute_rfm(df:pd.DataFrame, date:pd.Timestamp)->pd.DataFrame:
 
-    recency = Pipeline([
-    ('recency', Recency(date_to_compare=pd.Timestamp(2013,1,10)).set_output(transform='pandas'))
-    ])
-    spending = Pipeline([
-        ('spending', Spending().set_output(transform='pandas'))
-    ])
-    identity = Pipeline([
-        ('identity', Identity().set_output(transform='pandas'))
-    ])
-
-    rfm_trans = ColumnTransformer([
-        ('recency', recency, ['Customer ID', 'InvoiceDate']),
-        ('spending', spending, ['Quantity', 'Price']),
-        ('identity', identity, ['Customer ID', 'Invoice'])
-    ],
-    remainder='drop').set_output(transform='pandas')
-
-    df_1 = rfm_trans.fit_transform(df)
+    df_1 = rfm_by_operation(df, date)
 
     del df
 
@@ -54,38 +41,17 @@ def compute_rfm(df:pd.DataFrame)->pd.DataFrame:
 
     del df_1
 
-    encoder = Pipeline([
-        ('encoder', QuartileEncoder().set_output(transform='pandas'))
-    ])
+    df_3 = encoder_by_quartiles(df_2)
 
-    encoder_trans = ColumnTransformer([
-        ('quantiles', encoder, ['frequency', 'recency', 'monetary']),
-        ('identity1', identity, ['Customer ID'])
-    ],
-    remainder='passthrough').set_output(transform='pandas')
-
-    df_3 = encoder_trans.fit_transform(df_2)
-
-    del df_2
-
-    rfm_pipe = Pipeline([
-        ('rfm_pipe', RFMcalculator().set_output(transform='pandas'))
-    ])
-    rfm_value = ColumnTransformer([
-        ('rfm_calc', rfm_pipe, ['quantiles__frequency_enc', 'quantiles__recency_enc', 'quantiles__monetary_enc']),
-        ('identity1', identity, ['identity1__Customer ID'])
-    ],
-    remainder='drop').set_output(transform='pandas')
-
-    df_4 = rfm_value.fit_transform(df_3)
+    df_4 = category_encoder(df_3)
 
     del df_3
 
-    df_4.columns = [col.split('__')[-1] for col in df_4.columns]
-
-    return df_4
+    return df_4.merge(df_2, on='Customer ID')
 
 def execute_main():
+
+    st.set_page_config(layout="wide")
 
     WEB_PATH = 'https://raw.githubusercontent.com/LuisGiraldo86/auxiliarData/main/RFM/retails.tgz'
     FOLDER_PATH = os.path.join(path_to_wd, 'data')
@@ -94,7 +60,32 @@ def execute_main():
 
     df = load_dataset(FOLDER_PATH)
 
-    df_rfm = compute_rfm(df=df)
+    df_rfm = compute_rfm(df=df, date=pd.Timestamp(2013,1,10))
+
+    st.title('RFM analysis of e-commerce sales')
+
+    with st.container(border=True):
+        st.write('Distribution of customer in levels and sublevels.')
+
+        df_grouped = df_rfm.groupby(by=['scale', 'subscale'], as_index=False).agg(
+            Total= pd.NamedAgg(column='Customer ID', aggfunc='count')
+        )
+
+        fig = px.treemap(df_grouped, path=['scale', 'subscale'], values='Total', color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
+        st.plotly_chart(fig)
+
+    with st.container(border=True):
+        st.write('Customers clustering')
+
+        my_axes =  axes_style3d() 
+        fig = px.scatter_3d(df_rfm, x='frequency', y='recency', z='monetary', color='scale', opacity=0.9, color_discrete_sequence=px.colors.qualitative.Pastel, symbol='scale')
+        fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
+        fig.update_layout(scene=dict(xaxis=my_axes, 
+                             yaxis=my_axes, 
+                             zaxis=my_axes))
+        fig.update_traces(marker_size = 5)
+        st.plotly_chart(fig)
 
 
     pass
