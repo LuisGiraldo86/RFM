@@ -71,7 +71,12 @@ def execute_main():
             Total= pd.NamedAgg(column='Customer ID', aggfunc='count')
         )
 
-        fig = px.treemap(df_grouped, path=['scale', 'subscale'], values='Total', color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig = px.treemap(
+            df_grouped, 
+            path                   =['scale', 'subscale'], 
+            values                 ='Total', 
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
         fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
         st.plotly_chart(fig)
 
@@ -79,7 +84,16 @@ def execute_main():
         st.write('Customers clustering')
 
         my_axes =  axes_style3d() 
-        fig = px.scatter_3d(df_rfm, x='frequency', y='recency', z='monetary', color='scale', opacity=0.9, color_discrete_sequence=px.colors.qualitative.Pastel, symbol='scale')
+        fig = px.scatter_3d(
+            df_rfm, 
+            x                      ='frequency', 
+            y                      ='recency', 
+            z                      ='monetary', 
+            color                  ='scale', 
+            opacity                =0.9, 
+            color_discrete_sequence=px.colors.qualitative.Pastel, 
+            symbol                 ='scale'
+        )
         fig.update_layout(margin=dict(l=0, r=0, b=0, t=0))
         fig.update_layout(scene=dict(xaxis=my_axes, 
                              yaxis=my_axes, 
