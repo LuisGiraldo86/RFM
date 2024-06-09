@@ -1,19 +1,13 @@
 import os
 import sys
-import json
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 
 import plotly.express as px
-import plotly.graph_objects as go
-
-from plotly.colors import n_colors
 
 from rfm_clustering.helpers import fetch_web_data, load_dataset
 from rfm_clustering.rfm_steps import rfm_by_operation, raw_rfm, encoder_by_quartiles, category_encoder
-
 
 # get current working directory
 path_to_wd = os.getcwd()
@@ -23,13 +17,15 @@ sys.path.append(
     os.path.join(path_to_wd, 'rfm_clustering')
 )
 
-def axes_style3d(bgcolor = "rgb(204, 204, 204)",
-                 gridcolor="rgb(150, 150, 150)", 
-                 zeroline=False): 
-    return dict(showbackground =True,
-                backgroundcolor=bgcolor,
-                gridcolor=gridcolor,
-                zeroline=False)
+def axes_style3d(bgcolor= "rgb(204, 204, 204)", gridcolor="rgb(150, 150, 150)", zeroline =False)->dict:
+
+    config = dict(
+        showbackground =True,
+        backgroundcolor=bgcolor,
+        gridcolor      =gridcolor,
+        zeroline       =zeroline
+    )
+    return config
 
 def compute_rfm(df:pd.DataFrame, date:pd.Timestamp)->pd.DataFrame:
 
