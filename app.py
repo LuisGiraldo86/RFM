@@ -71,7 +71,8 @@ def execute_main():
             df_grouped, 
             path                   =['scale', 'subscale'], 
             values                 ='Total', 
-            color_discrete_sequence=px.colors.qualitative.Pastel
+            color_continuous_scale ='sunset',
+            color                  ='Total'
         )
         fig.update_layout(margin = dict(t=50, l=25, r=25, b=25))
         st.plotly_chart(fig)
